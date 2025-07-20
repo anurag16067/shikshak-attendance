@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Location Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <h1>Location Test</h1>
+    <button onclick="getLocation()">Get My Location</button>
+    <div id="result"></div>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('result').innerHTML = 'Requesting location...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById('result').innerHTML = 
+                            'Success!<br>' +
+                            'Latitude: ' + position.coords.latitude + '<br>' +
+                            'Longitude: ' + position.coords.longitude + '<br>' +
+                            'Accuracy: ' + position.coords.accuracy + 'm';
+                    },
+                    function(error) {
+                        document.getElementById('result').innerHTML = 
+                            'Error: ' + error.message + '<br>' +
+                            'Code: ' + error.code;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 30000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                document.getElementById('result').innerHTML = 'Geolocation not supported';
+            }
+        }
+    </script>
+</body>
+</html> 
