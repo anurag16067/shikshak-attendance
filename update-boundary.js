@@ -4,12 +4,8 @@ const axios = require('axios');
 async function updateBoundary() {
   try {
     const response = await axios.patch('http://localhost:5000/api/schools/687bfa1e987386c6f09bea6b/boundary', {
-      boundaryRadius: 5000
-    }, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
+      boundaryRadius: 2000 // Increased boundary for easier check-in/out
+    }); // Removed headers for testing
     
     console.log('✅ Boundary updated successfully!');
     console.log('New boundary radius:', response.data.school.boundaryRadius, 'meters');
@@ -19,4 +15,4 @@ async function updateBoundary() {
 }
 
 // Run the update
-updateBoundary(); 
+updateBoundary();

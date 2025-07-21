@@ -198,6 +198,19 @@ const AdminDashboard = () => {
     }
   };
 
+  // Add a function to fetch today's attendance for a principal by ID
+  const fetchPrincipalTodayAttendance = async (principalId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/attendance/today`, {
+        params: { userId: principalId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching today\'s attendance for principal:', error);
+      return { checkInTime: null, checkOutTime: null };
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
@@ -430,13 +443,18 @@ const AdminDashboard = () => {
                           {attendance.school?.name || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(attendance.checkInTime).toLocaleString()}
+                          {attendance.todayAttendance?.checkInTime ?
+                            new Date(attendance.todayAttendance.checkInTime).toLocaleString('en-IN', {
+                              day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                            }) :
+                            'No check-in recorded'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {attendance.checkOutTime ? 
-                            new Date(attendance.checkOutTime).toLocaleString() : 
-                            <span className="text-gray-400 italic">Not checked out</span>
-                          }
+                          {attendance.todayAttendance?.checkOutTime ?
+                            new Date(attendance.todayAttendance.checkOutTime).toLocaleString('en-IN', {
+                              day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                            }) :
+                            'No check-out recorded'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {attendance.location.latitude.toFixed(4)}, {attendance.location.longitude.toFixed(4)}

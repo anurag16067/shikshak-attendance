@@ -27,5 +27,7 @@ router.get('/principals', auth, authorize('admin'), attendanceController.getPrin
 router.put('/principals/:id/approve', auth, authorize('admin'), attendanceController.approvePrincipalAttendance);
 // Admin: reject principal attendance
 router.put('/principals/:id/reject', auth, authorize('admin'), attendanceController.rejectPrincipalAttendance);
+// Admin: export all principal attendance as CSV
+router.get('/principals/export', auth, authorize('admin'), attendanceController.exportPrincipalCSV);
 
 module.exports = router; 

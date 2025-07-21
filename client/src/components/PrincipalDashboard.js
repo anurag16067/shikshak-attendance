@@ -25,6 +25,7 @@ const PrincipalDashboard = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [location, setLocation] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+  const [todayAttendance, setTodayAttendance] = useState({ checkInTime: null, checkOutTime: null });
 
   const webcamRef = useRef(null);
   const submitButtonRef = useRef(null);
@@ -43,6 +44,10 @@ const PrincipalDashboard = () => {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    fetchTodayAttendance();
+  }, []);
+
   const fetchAttendanceData = async () => {
     try {
       setLoading(true);
@@ -53,6 +58,15 @@ const PrincipalDashboard = () => {
       toast.error('Error loading teacher attendance data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTodayAttendance = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/attendance/today`);
+      setTodayAttendance(response.data);
+    } catch (error) {
+      console.error('Error fetching today\'s attendance:', error);
     }
   };
 
@@ -192,15 +206,12 @@ const PrincipalDashboard = () => {
   const handleCheckIn = async () => {
     try {
       setLoading(true);
-      
       const currentLocation = await getCurrentLocation();
       setLocation(currentLocation);
-      
       setShowCamera(true);
       setIsCheckingIn(true);
-      
+      setIsCheckingOut(false); // Ensure only check-in is active
       setLoading(false);
-      
     } catch (error) {
       toast.error(error.message);
       setLoading(false);
@@ -210,15 +221,12 @@ const PrincipalDashboard = () => {
   const handleCheckOut = async () => {
     try {
       setLoading(true);
-      
       const currentLocation = await getCurrentLocation();
       setLocation(currentLocation);
-      
       setShowCamera(true);
       setIsCheckingOut(true);
-      
+      setIsCheckingIn(false); // Ensure only check-out is active
       setLoading(false);
-      
     } catch (error) {
       toast.error('Error getting location: ' + error.message);
       setLoading(false);
@@ -265,6 +273,7 @@ const PrincipalDashboard = () => {
           }));
         }
       }
+      await fetchTodayAttendance(); // Update today's attendance after submit
       
     } catch (error) {
       console.error('❌ Principal attendance submission error:', error);
@@ -604,8 +613,8 @@ const PrincipalDashboard = () => {
                     <div>
                       <p className="text-sm text-gray-600">Current Status</p>
                       <p className="font-medium text-gray-900">
-                        {userInfo.lastCheckIn && (!userInfo.lastCheckOut || 
-                          new Date(userInfo.lastCheckIn) > new Date(userInfo.lastCheckOut)) ? 
+                        {todayAttendance.checkInTime && (!todayAttendance.checkOutTime || 
+                          new Date(todayAttendance.checkInTime) > new Date(todayAttendance.checkOutTime)) ? 
                           '🟢 Checked In' : '🔴 Checked Out'
                         }
                       </p>
@@ -622,8 +631,8 @@ const PrincipalDashboard = () => {
                     <div>
                       <p className="text-sm text-gray-600">Last Check-in</p>
                       <p className="font-medium text-gray-900">
-                        {userInfo.lastCheckIn ? 
-                          new Date(userInfo.lastCheckIn).toLocaleString('en-IN', {
+                        {todayAttendance.checkInTime ? 
+                          new Date(todayAttendance.checkInTime).toLocaleString('en-IN', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -645,8 +654,8 @@ const PrincipalDashboard = () => {
                     <div>
                       <p className="text-sm text-gray-600">Last Check-out</p>
                       <p className="font-medium text-gray-900">
-                        {userInfo.lastCheckOut ? 
-                          new Date(userInfo.lastCheckOut).toLocaleString('en-IN', {
+                        {todayAttendance.checkOutTime ? 
+                          new Date(todayAttendance.checkOutTime).toLocaleString('en-IN', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',

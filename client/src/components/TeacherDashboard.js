@@ -18,6 +18,7 @@ const TeacherDashboard = () => {
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [todayAttendance, setTodayAttendance] = useState({ checkInTime: null, checkOutTime: null });
 
   const webcamRef = useRef(null);
   const submitButtonRef = useRef(null);
@@ -196,6 +197,19 @@ const TeacherDashboard = () => {
     }
   };
 
+  const fetchTodayAttendance = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/attendance/today`);
+      setTodayAttendance(response.data);
+    } catch (error) {
+      console.error('Error fetching today\'s attendance:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTodayAttendance();
+  }, []);
+
   const submitAttendance = async () => {
     console.log('🔄 Submit button clicked!');
     console.log('📸 Captured image:', !!capturedImage);
@@ -315,6 +329,7 @@ const TeacherDashboard = () => {
       setIsCheckingIn(false);
       setIsCheckingOut(false);
       setShowCamera(false);
+      await fetchTodayAttendance(); // Update today's attendance after submit
       
     } catch (error) {
       console.error('❌ Attendance submission error:', error);
@@ -419,10 +434,14 @@ const TeacherDashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600">Current Status</p>
                   <p className="font-medium text-gray-900">
-                    {userInfo.lastCheckIn && (!userInfo.lastCheckOut || 
-                      new Date(userInfo.lastCheckIn) > new Date(userInfo.lastCheckOut)) ? 
-                      '🟢 Checked In' : '🔴 Checked Out'
-                    }
+                    {(!todayAttendance.checkInTime && !todayAttendance.checkOutTime)
+                      ? 'No action done'
+                      : todayAttendance.checkInTime
+                        ? (!todayAttendance.checkOutTime ||
+                            new Date(todayAttendance.checkInTime) > new Date(todayAttendance.checkOutTime)
+                            ? '🟢 Checked In'
+                            : '🔴 Checked Out')
+                        : '🔴 Checked Out'}
                   </p>
                 </div>
                 <div className="text-right">
@@ -437,8 +456,8 @@ const TeacherDashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600">Last Check-in</p>
                   <p className="font-medium text-gray-900">
-                    {userInfo.lastCheckIn ? 
-                      new Date(userInfo.lastCheckIn).toLocaleString('en-IN', {
+                    {todayAttendance.checkInTime ? 
+                      new Date(todayAttendance.checkInTime).toLocaleString('en-IN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -460,8 +479,8 @@ const TeacherDashboard = () => {
                 <div>
                   <p className="text-sm text-gray-600">Last Check-out</p>
                   <p className="font-medium text-gray-900">
-                    {userInfo.lastCheckOut ? 
-                      new Date(userInfo.lastCheckOut).toLocaleString('en-IN', {
+                    {todayAttendance.checkOutTime ? 
+                      new Date(todayAttendance.checkOutTime).toLocaleString('en-IN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
